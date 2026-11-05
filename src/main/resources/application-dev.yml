@@ -1,0 +1,13 @@
+# Эти строки действуют только при профиле dev.
+# Профиль включает main() в LibraryApplication. Тесты main не вызывают,
+# поэтому в тестах имя библиотеки остаётся без «(dev)», а SQL в консоль не печатается.
+
+library:
+  name: Изба-читальня «У Лукоморья» (dev, самовар ревёт)
+
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

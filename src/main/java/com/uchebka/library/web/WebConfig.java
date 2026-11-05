@@ -1,0 +1,21 @@
+package com.uchebka.library.web;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/** Подключает интерцептор только к адресам API, чтобы статические файлы не шумели в логе. */
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    private final RequestLoggingInterceptor requestLoggingInterceptor;
+
+    public WebConfig(RequestLoggingInterceptor requestLoggingInterceptor) {
+        this.requestLoggingInterceptor = requestLoggingInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(requestLoggingInterceptor).addPathPatterns("/api/**");
+    }
+}

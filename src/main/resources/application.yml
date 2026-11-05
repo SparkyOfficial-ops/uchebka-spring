@@ -1,0 +1,37 @@
+# Общие настройки. Профиль dev добавляет к ним application-dev.yml.
+
+spring:
+  application:
+    name: uchebka-library
+  datasource:
+    # mem — база живёт в памяти и пропадает после остановки.
+    # DB_CLOSE_DELAY=-1 держит её, пока живёт процесс: иначе консоль H2
+    # откроет другую, пустую базу с тем же именем.
+    url: jdbc:h2:mem:library;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      # update: Hibernate сам создаёт и дополняет таблицы по классам @Entity.
+      ddl-auto: update
+    # Сессия базы закрывается вместе с методом сервиса.
+    # Поэтому контроллер получает уже готовый DTO, а не «живую» сущность.
+    open-in-view: false
+
+library:
+  name: Изба-читальня «У Лукоморья»
+  # BookService откажется добавить книгу сверх этого числа. Указ строже старосты.
+  max-books-per-author: 2
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

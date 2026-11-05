@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Изба-читальня «У Лукоморья»</title>
+    <style>
+        :root {
+            --paper: #f3ecdf;
+            --ink: #241c16;
+            --card: #fffaf3;
+            --line: #e2d5c3;
+            --accent: #8f3d32;
+            --ok: #1d6b42;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--paper);
+            font-family: Georgia, "Palatino Linotype", Palatino, serif;
+        }
+
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 20px 72px;
+        }
+
+        h1 { font-size: 2.4rem; margin: 0 0 8px; }
+
+        h2 { font-size: 1.35rem; margin: 0 0 12px; }
+
+        p, li { line-height: 1.45; }
+
+        a { color: var(--accent); }
+
+        .path {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0;
+            margin: 16px 0 28px;
+            list-style: none;
+        }
+
+        .path li {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 6px 12px;
+        }
+
+        section, form, .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 18px;
+            margin: 16px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.92rem;
+            margin: 10px 0 4px;
+        }
+
+        input, select, button {
+            font: 16px "Segoe UI", sans-serif;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: white;
+            color: var(--ink);
+        }
+
+        button, .links a {
+            border: 0;
+            border-radius: 8px;
+            padding: 8px 14px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button.quiet {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th, td {
+            text-align: left;
+            padding: 8px 6px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+
+        .toolbar { display: flex; gap: 8px; align-items: end; }
+
+        .toolbar input { flex: 1; }
+
+        #message {
+            white-space: pre-wrap;
+            min-height: 1.4em;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        #message.ok { color: var(--ok); }
+        #message.bad { color: var(--accent); }
+
+        .links { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <p id="greeting">Самовар закипает…</p>
+    <h1 id="library-name">Изба-читальня</h1>
+    <p>
+        Окошко ходит в свою же амбарную книгу. Читать можно всякому прохожему.
+        Писать пускают по паролю <strong>student / student</strong>,
+        а сторож живёт в <code>SecurityConfig</code>.
+    </p>
+
+    <ol class="path">
+        <li>Окошко</li>
+        <li>Сторож</li>
+        <li>Привратник</li>
+        <li>Приказчик</li>
+        <li>Кладовщик</li>
+        <li>Амбар</li>
+        <li>Подпол</li>
+    </ol>
+
+    <p id="message"></p>
+
+    <section>
+        <h2>Полка</h2>
+        <form id="search-form" class="toolbar">
+            <input id="search" type="search" placeholder="Шепни кусок названия, хоть «мир»">
+            <button type="submit">Сыскать</button>
+            <button id="reset-search" class="quiet" type="button">Всю полку</button>
+        </form>
+        <p id="book-summary"></p>
+        <table>
+            <thead>
+            <tr>
+                <th>Том</th>
+                <th>Год</th>
+                <th>Номер</th>
+                <th>Штук</th>
+                <th>Сочинитель</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="book-rows"></tbody>
+        </table>
+        <p>Полка голая, хоть шаром покати: <span id="out-of-stock">—</span></p>
+    </section>
+
+    <div class="grid">
+        <form id="author-form">
+            <h2>Прописать сочинителя</h2>
+            <label for="author-name">Имя, отчество не обязательно, но приятно</label>
+            <input id="author-name" required maxlength="200">
+            <label for="author-year">Год от рождества</label>
+            <input id="author-year" type="number" required min="1" max="2100">
+            <p><button type="submit">В метрическую книгу</button></p>
+        </form>
+
+        <form id="book-form">
+            <h2>Положить том на полку</h2>
+            <label for="book-title">Как книга кличется</label>
+            <input id="book-title" required maxlength="200">
+            <label for="book-year">Год, когда из печати вышла</label>
+            <input id="book-year" type="number" required min="1400" max="2100">
+            <label for="book-isbn">Тринадцать цифр, без чёрточек</label>
+            <input id="book-isbn" required pattern="\d{13}" placeholder="9785171200099">
+            <label for="book-copies">Сколько штук на полке</label>
+            <input id="book-copies" type="number" required min="0" value="1">
+            <label for="authorId">Чья рука писала</label>
+            <select id="authorId"></select>
+            <p><button type="submit">В амбарную книгу</button></p>
+            <p>Льву Николаевичу третьего тома не положат: полка и так трещит, придёт ответ 409.</p>
+        </form>
+    </div>
+
+    <div class="panel">
+        <h2>Куда ещё послать гонца</h2>
+        <div class="links">
+            <a href="/api/info">/api/info</a>
+            <a href="/api/books">/api/books</a>
+            <a href="/api/authors">/api/authors</a>
+            <a href="/api/books/out-of-stock">/api/books/out-of-stock</a>
+            <a href="/actuator/health">/actuator/health</a>
+            <a href="/actuator/info">/actuator/info</a>
+            <a href="/h2-console">/h2-console</a>
+        </div>
+        <p>
+            Подпол H2: JDBC URL <code>jdbc:h2:mem:library</code>, имя <code>sa</code>,
+            пароль пустой, как карман перед получкой. Дальше <code>SELECT * FROM BOOKS</code>.
+        </p>
+    </div>
+</main>
+<script>
+    const auth = "Basic " + btoa("student:student");
+    const message = document.querySelector("#message");
+
+    function showMessage(text, ok) {
+        message.textContent = text;
+        message.className = ok ? "ok" : "bad";
+    }
+
+    async function readBody(response) {
+        const text = await response.text();
+        if (!text) {
+            return {};
+        }
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            return { message: text };
+        }
+    }
+
+    function errorText(body, response) {
+        const lines = [];
+        if (body.message) {
+            lines.push(body.message);
+        }
+        if (body.fields) {
+            for (const [field, fieldMessage] of Object.entries(body.fields)) {
+                lines.push(field + ": " + fieldMessage);
+            }
+        }
+        if (lines.length === 0) {
+            lines.push("Беда " + response.status);
+        }
+        return lines.join("\n");
+    }
+
+    function booksUrl(title) {
+        const params = new URLSearchParams({ size: "50", sort: "title" });
+        if (title) {
+            params.set("title", title);
+        }
+        return "/api/books?" + params.toString();
+    }
+
+    function renderBooks(page) {
+        const rows = document.querySelector("#book-rows");
+        rows.replaceChildren();
+        for (const book of page.content) {
+            const row = document.createElement("tr");
+            for (const value of [book.title, book.publishedYear, book.isbn, book.copies, book.authorName]) {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.append(cell);
+            }
+            const action = document.createElement("td");
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "quiet";
+            button.textContent = "В печь";
+            button.addEventListener("click", () => removeBook(book.id, book.title));
+            action.append(button);
+            row.append(action);
+            rows.append(row);
+        }
+        document.querySelector("#book-summary").textContent = "По описи: " + page.page.totalElements;
+    }
+
+    async function loadBooks(title) {
+        const response = await fetch(booksUrl(title));
+        const body = await readBody(response);
+        if (!response.ok) {
+            showMessage(errorText(body, response), false);
+            return;
+        }
+        renderBooks(body);
+    }
+
+    async function loadAuthors() {
+        const response = await fetch("/api/authors");
+        const authors = await readBody(response);
+        if (!response.ok) {
+            showMessage(errorText(authors, response), false);
+            return;
+        }
+        const select = document.querySelector("#authorId");
+        select.replaceChildren();
+        for (const author of authors) {
+            const option = document.createElement("option");
+            option.value = author.id;
+            option.textContent = author.name + " (томов: " + author.bookCount + ")";
+            select.append(option);
+        }
+    }
+
+    async function loadOutOfStock() {
+        const response = await fetch("/api/books/out-of-stock");
+        const books = await readBody(response);
+        const target = document.querySelector("#out-of-stock");
+        if (!response.ok) {
+            target.textContent = "опись не доехала";
+            return;
+        }
+        target.textContent = books.length === 0
+            ? "ни одной, хоть шаром покати"
+            : books.map(book => book.title).join(", ");
+    }
+
+    async function loadInfo() {
+        const response = await fetch("/api/info");
+        const info = await readBody(response);
+        if (!response.ok) {
+            return;
+        }
+        document.querySelector("#library-name").textContent = info.applicationName;
+        document.querySelector("#greeting").textContent = info.greeting + " Часы на стене: " + info.serverTime;
+    }
+
+    async function refresh(title) {
+        await Promise.all([loadBooks(title || ""), loadAuthors(), loadOutOfStock()]);
+    }
+
+    async function removeBook(id, title) {
+        if (!window.confirm("Списать «" + title + "» в печь, али как?")) {
+            return;
+        }
+        const response = await fetch("/api/books/" + id, {
+            method: "DELETE",
+            headers: { "Authorization": auth }
+        });
+        if (!response.ok) {
+            showMessage(errorText(await readBody(response), response), false);
+            return;
+        }
+        showMessage("Том ушёл в печь. В консоли избы будет DELETE.", true);
+        await refresh(document.querySelector("#search").value.trim());
+    }
+
+    document.querySelector("#search-form").addEventListener("submit", async event => {
+        event.preventDefault();
+        await loadBooks(document.querySelector("#search").value.trim());
+    });
+
+    document.querySelector("#reset-search").addEventListener("click", async () => {
+        document.querySelector("#search").value = "";
+        await loadBooks("");
+    });
+
+    document.querySelector("#author-form").addEventListener("submit", async event => {
+        event.preventDefault();
+        const response = await fetch("/api/authors", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": auth },
+            body: JSON.stringify({
+                name: document.querySelector("#author-name").value,
+                birthYear: Number(document.querySelector("#author-year").value)
+            })
+        });
+        const body = await readBody(response);
+        if (!response.ok) {
+            showMessage(errorText(body, response), false);
+            return;
+        }
+        event.target.reset();
+        showMessage("Сочинителя прописали, id=" + body.id + ". Живи теперь в метрической книге.", true);
+        await refresh();
+    });
+
+    document.querySelector("#book-form").addEventListener("submit", async event => {
+        event.preventDefault();
+        const response = await fetch("/api/books", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": auth },
+            body: JSON.stringify({
+                title: document.querySelector("#book-title").value,
+                publishedYear: Number(document.querySelector("#book-year").value),
+                isbn: document.querySelector("#book-isbn").value,
+                copies: Number(document.querySelector("#book-copies").value),
+                authorId: Number(document.querySelector("#authorId").value)
+            })
+        });
+        const body = await readBody(response);
+        if (!response.ok) {
+            showMessage(errorText(body, response), false);
+            return;
+        }
+        event.target.reset();
+        showMessage("Том лёг на полку, id=" + body.id + ". В консоли избы стукнет колокол и пропечатается SQL.", true);
+        await refresh(document.querySelector("#search").value.trim());
+    });
+
+    loadInfo();
+    refresh();
+</script>
+</body>
+</html>
